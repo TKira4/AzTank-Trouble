@@ -2,9 +2,9 @@
 
 ## Mô tả dự án
 AzTank Trouble là một game bắn súng arcade theo phong cách AzTank Trouble, được xây dựng bằng SDL2 (C++). Game có các tính năng:
-- **Đối tượng chính:** Xe tăng (có thể là 1 hoặc nhiều xe) đại diện cho “cầu thủ”.
+- **Đối tượng chính:** Xe tăng (có thể là 1 hoặc nhiều xe) đại diện cho người chơi.
 - **Input bàn phím:** Hỗ trợ 2 người chơi (mũi tên và WASD) với khả năng điều khiển riêng biệt.
-- **Tương tác đối tượng:** Xử lý va chạm giữa đạn, xe tăng và các biên cửa sổ với hiệu ứng phản xạ.
+- **Tương tác đối tượng:** Xử lý va chạm giữa đạn, xe tăng và các tường với hiệu ứng phản xạ.
 - **Hiển thị điểm số:** Sử dụng SDL_ttf để render text.
 - **Chế độ chơi:** Player vs Player và Player vs Computer (với AI đơn giản).
 - **Ngoại lực:** Ví dụ như “gió” tác động lên đạn, làm thay đổi hướng di chuyển.
