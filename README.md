@@ -33,10 +33,10 @@ AzTankTrouble/
  │  ├── Game.h / Game.cpp # Lớp quản lý game: vòng lặp, cập nhật, render 
  │  ├── Tank.h / Tank.cpp # Lớp xe tăng: thuộc tính, di chuyển, xử lý input 
  │  ├── Bullet.h / Bullet.cpp # Lớp đạn: chuyển động, va chạm, phản xạ 
- │  ├── CollisionManager.h / CollisionManager.cpp # Xử lý va chạm giữa các đối tượng 
  │  ├── AI.h / AI.cpp # Lớp AI cho chế độ Player vs Computer 
- │  └── Utils.h / Utils.cpp # Các hàm tiện ích 
- └── libs/ # (Tùy chọn) Các thư viện bên ngoài nếu cần
+ │  ├── Maze.h / Maze.cpp # Vẽ mê cung
+ │  └── UI.cpp
+
  
 ```
 

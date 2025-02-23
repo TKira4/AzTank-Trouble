@@ -16,7 +16,7 @@ void showNotification(SDL_Renderer* renderer, const std::string &message) {
     }
     
     // Load font (chọn font bạn muốn, ví dụ: Arial.ttf ở cùng thư mục, kích thước 24)
-    TTF_Font* font = TTF_OpenFont("assets/Font/Arial.ttf", 24);
+    TTF_Font* font = TTF_OpenFont("assets/fonts/Arial.ttf", 24);
     if (!font) {
         SDL_Log("TTF_OpenFont: %s", TTF_GetError());
         return;
