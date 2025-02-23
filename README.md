@@ -9,6 +9,16 @@ AzTank Trouble là một game bắn súng arcade theo phong cách AzTank Trouble
 - **Chế độ chơi:** Player vs Player và Player vs Computer (với AI đơn giản).
 - **Ngoại lực:** Ví dụ như “gió” tác động lên đạn, làm thay đổi hướng di chuyển.
 
+## Cài đặt thư viện
+Vì tôi dùng MSYS MINGW64 nên cài thông qua nó luôn. Mở giao diện MSYS MINGW64 lên và gõ từng lệnh sau:
+```basg
+pacman -Syu
+
+pacman -S mingw-w64-x86_64-SDL2 mingw-w64-x86_64-SDL2_image mingw-w64-x86_64-SDL2_ttf mingw-w64-x86_64-SDL2_mixer
+```
+
+
+
 ## Cấu trúc dự án
 ```plaintext
 AzTankTrouble/
@@ -27,6 +37,7 @@ AzTankTrouble/
  │  ├── AI.h / AI.cpp # Lớp AI cho chế độ Player vs Computer 
  │  └── Utils.h / Utils.cpp # Các hàm tiện ích 
  └── libs/ # (Tùy chọn) Các thư viện bên ngoài nếu cần
+ 
 ```
 
 
