@@ -9,7 +9,7 @@ public:
     float x, y;     // top-left
     float vx, vy;
     int size;
-    int owner;      // 0=player, 1=AI
+    int owner;      
     Uint32 spawnTime; //(ms)
 
     Bullet(float x, float y, float vx, float vy, int owner);

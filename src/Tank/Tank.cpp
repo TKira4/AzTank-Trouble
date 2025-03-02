@@ -71,6 +71,39 @@ void Tank::update(const Uint8* keyState, float deltaTime, Maze &maze) {
     }
 }
 
+void Tank::updatePlayer2(const Uint8* keyState, float deltaTime, Maze & maze){
+    float turnSpeed = PI;
+    if (keyState[SDL_SCANCODE_LEFT])
+        angle -= turnSpeed * deltaTime;
+    if (keyState[SDL_SCANCODE_RIGHT])
+        angle += turnSpeed * deltaTime;
+    
+    float moveX = 0, moveY = 0;
+    if (keyState[SDL_SCANCODE_UP]) {
+        moveX += cos(angle);
+        moveY += sin(angle);
+    }
+    if (keyState[SDL_SCANCODE_DOWN]) {
+        moveX -= cos(angle);
+        moveY -= sin(angle);
+    }
+    float mag = sqrt(moveX*moveX + moveY*moveY);
+    if (mag>0){
+        moveX /= mag;
+        moveY /= mag;
+    }
+    float dispX = moveX * speed * deltaTime;
+    float dispY = moveY * speed * deltaTime;
+    float origX = x, origY = y;
+    x += dispX;
+    y += dispY;
+    if (collidesWithMaze(getCollisionRect(), maze)) {
+        x = origX;
+        y = origY;
+    }
+}
+
+
 void Tank::initTexture(SDL_Renderer* renderer) {
     SDL_Rect rect = getRect();
     //texture cho tank's body

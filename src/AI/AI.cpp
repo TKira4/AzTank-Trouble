@@ -3,6 +3,7 @@
 #include <cstdlib>
 #include <algorithm>
 #include <queue>
+#include <limits>
 
 static const float PI = 3.14159f;
 
@@ -13,7 +14,7 @@ struct Node {
 };
 
 static float heuristic(int x1, int y1, int x2, int y2) {
-    return abs(x1 - x2) + abs(y1 - y2);
+    return std::abs(x1 - x2) + std::abs(y1 - y2);
 }
 
 struct CompareNode {
@@ -26,7 +27,6 @@ static std::vector<SDL_Point> computeAStar(Maze &maze, int startX, int startY, i
     std::vector<SDL_Point> path;
     std::vector<std::vector<bool>> closed(maze.rows, std::vector<bool>(maze.cols, false));
     std::vector<std::vector<Node*>> allNodes(maze.rows, std::vector<Node*>(maze.cols, nullptr));
-
     std::priority_queue<Node*, std::vector<Node*>, CompareNode> openSet;
 
     Node* startNode = new Node{ startX, startY, 0, heuristic(startX, startY, goalX, goalY), nullptr };
@@ -35,7 +35,6 @@ static std::vector<SDL_Point> computeAStar(Maze &maze, int startX, int startY, i
 
     int dx[4] = {0, 0, -1, 1};
     int dy[4] = {-1, 1, 0, 0};
-
     Node* goalNode = nullptr;
     while (!openSet.empty()) {
         Node* current = openSet.top();
@@ -71,7 +70,6 @@ static std::vector<SDL_Point> computeAStar(Maze &maze, int startX, int startY, i
             }
         }
     }
-
     if (goalNode != nullptr) {
         Node* current = goalNode;
         while (current != nullptr) {
@@ -80,75 +78,91 @@ static std::vector<SDL_Point> computeAStar(Maze &maze, int startX, int startY, i
         }
         std::reverse(path.begin(), path.end());
     }
-
     for (auto &row : allNodes) {
         for (auto &node : row) {
             delete node;
         }
     }
-
     return path;
 }
 
-AITank::AITank(float x, float y, SDL_Color color)
-    : Tank(x, y, color), currentWaypoint(0), pathUpdateTimer(0), shootCooldown(0)
-{
-}
+AITank::AITank(float x, float y, SDL_Color color, int owner)
+    : Tank(x, y, color), currentWaypoint(0), pathUpdateTimer(0), shootCooldown(0), aiOwner(owner)
+{ }
 
-void AITank::updateAI(Tank &player, Maze &maze, float deltaTime, std::vector<Bullet> &bullets) {
+void AITank::updateAI(const std::vector<Tank*>& targets, Maze &maze, float deltaTime, std::vector<Bullet> &bullets) {
     shootCooldown -= deltaTime;
     pathUpdateTimer -= deltaTime;
 
-    int aiCellX = (int)(getCenter().x / maze.cellSize);
-    int aiCellY = (int)(getCenter().y / maze.cellSize);
-    int pCellX = (int)(player.getCenter().x / maze.cellSize);
-    int pCellY = (int)(player.getCenter().y / maze.cellSize);
+    //finding the nearest target
+    Tank* nearestTarget = nullptr;
+    float minDistance = std::numeric_limits<float>::max();
+    SDL_Point myCenter = getCenter();
+    for (Tank* t : targets) {
+        if (t && t->alive) {
+            SDL_Point tCenter = t->getCenter();
+            float dx = tCenter.x - myCenter.x;
+            float dy = tCenter.y - myCenter.y;
+            float dist = std::sqrt(dx * dx + dy * dy);
+            if (dist < minDistance) {
+                minDistance = dist;
+                nearestTarget = t;
+            }
+        }
+    }
+    if (!nearestTarget)
+        return; 
 
-    //cap nhat duong di
+    int aiCellX = static_cast<int>(myCenter.x / maze.cellSize);
+    int aiCellY = static_cast<int>(myCenter.y / maze.cellSize);
+    int targetCellX = static_cast<int>(nearestTarget->getCenter().x / maze.cellSize);
+    int targetCellY = static_cast<int>(nearestTarget->getCenter().y / maze.cellSize);
+
     if (pathUpdateTimer <= 0) {
-        path = computeAStar(maze, aiCellX, aiCellY, pCellX, pCellY);
+        path = computeAStar(maze, aiCellX, aiCellY, targetCellX, targetCellY);
         currentWaypoint = 0;
         pathUpdateTimer = 1.0f;
+        //neu khong tim thay duong di se di chuyen ngau nhien
+        if (path.empty()) {
+            float randomAngle = ((float)rand() / RAND_MAX) * 2.f * PI;
+            x += cos(randomAngle) * speed * deltaTime;
+            y += sin(randomAngle) * speed * deltaTime;
+        }
     }
 
-    //AI di chuyen theo path
-    if (!path.empty() && currentWaypoint < (int)path.size()) {
+    if (!path.empty() && currentWaypoint < static_cast<int>(path.size())) {
         SDL_Point wp = path[currentWaypoint];
         float targetX = wp.x * maze.cellSize + maze.cellSize / 2 - width / 2;
         float targetY = wp.y * maze.cellSize + maze.cellSize / 2 - height / 2;
         float dx = targetX - x;
         float dy = targetY - y;
-        float dist = sqrt(dx * dx + dy * dy);
-
+        float dist = std::sqrt(dx * dx + dy * dy);
         if (dist < 5) {
             currentWaypoint++;
         } else {
             float moveX = dx / dist;
             float moveY = dy / dist;
             float moveDist = speed * deltaTime;
-
             float oldX = x, oldY = y;
             x += moveX * moveDist;
             y += moveY * moveDist;
-
             if (collidesWithMaze(getCollisionRect(), maze)) {
                 x = oldX;
                 y = oldY;
             }
-
-            angle = atan2(moveY, moveX);  
+            angle = std::atan2(moveY, moveX);
         }
     }
 
-    //AI ban khi trong pham vi
     if (shootCooldown <= 0) {
         SDL_Point a = getCenter();
-        SDL_Point p = player.getCenter();
-        float dx = p.x - a.x, dy = p.y - a.y;
-        float dist = sqrt(dx * dx + dy * dy);
+        SDL_Point tCenter = nearestTarget->getCenter();
+        float dx = tCenter.x - a.x;
+        float dy = tCenter.y - a.y;
+        float dist = std::sqrt(dx * dx + dy * dy);
         if (dist < 300) {
             shoot(bullets);
-            shootCooldown = 1.0f;   //khoang thoi gian cho
+            shootCooldown = 1.0f;
         }
     }
 }
@@ -159,7 +173,8 @@ void AITank::shoot(std::vector<Bullet> &bullets) {
     SDL_Point c = getCenter();
     float bx = c.x - 3;
     float by = c.y - 3;
-    bullets.push_back(Bullet(bx, by, cos(angle)*bulletSpeed, sin(angle)*bulletSpeed, 1));
+    // Sử dụng aiOwner đã được thiết lập để đánh dấu viên đạn của AI này
+    bullets.push_back(Bullet(bx, by, std::cos(angle) * bulletSpeed, std::sin(angle) * bulletSpeed, aiOwner));
 }
 
 void AITank::render(SDL_Renderer* renderer) {

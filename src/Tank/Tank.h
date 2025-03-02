@@ -6,6 +6,7 @@
 
 class Tank {
 public:
+    int score = 0;
     float x, y;
     float width, height;
     float speed;
@@ -23,6 +24,8 @@ public:
     
 
     virtual void update(const Uint8* keyState, float deltaTime, Maze &maze);
+
+    virtual void updatePlayer2(const Uint8* keyState, float deltaTime, Maze &maze);
 
     virtual void render(SDL_Renderer* renderer);
     

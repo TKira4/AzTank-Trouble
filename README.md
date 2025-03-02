@@ -16,7 +16,12 @@ pacman -Syu
 
 pacman -S mingw-w64-x86_64-SDL2 mingw-w64-x86_64-SDL2_image mingw-w64-x86_64-SDL2_ttf mingw-w64-x86_64-SDL2_mixer
 ```
+## Lệnh chạy chương trình
+```basg
+.\build.bat
 
+.\AzTankTrouble.exe
+```
 
 
 ## Cấu trúc dự án

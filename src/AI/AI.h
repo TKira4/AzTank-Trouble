@@ -1,4 +1,3 @@
-// AI.h
 #ifndef AI_TANK_H
 #define AI_TANK_H
 
@@ -14,11 +13,10 @@ public:
     int currentWaypoint;
     float pathUpdateTimer;
     float shootCooldown;
+    int aiOwner; // Mã owner cho đạn của AI này
 
-    AITank(float x, float y, SDL_Color color);
-
-    //dung A* de tim duong
-    void updateAI(Tank &player, Maze &maze, float deltaTime, std::vector<Bullet> &bullets);
+    AITank(float x, float y, SDL_Color color, int owner);
+    void updateAI(const std::vector<Tank*>& targets, Maze &maze, float deltaTime, std::vector<Bullet> &bullets);
     void shoot(std::vector<Bullet> &bullets);
     virtual void render(SDL_Renderer* renderer) override;
 };
