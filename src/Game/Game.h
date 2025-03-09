@@ -19,6 +19,7 @@ public:
     void run();
     void clean();
     Mix_Chunk* gunshotSound = nullptr;
+    Mix_Chunk* explosionSound = nullptr;
 private:
     SDL_Window* window;
     SDL_Renderer* renderer;

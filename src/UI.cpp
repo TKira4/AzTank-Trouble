@@ -92,7 +92,7 @@ int showModeMenu(SDL_Renderer* renderer) {
         SDL_RenderClear(renderer);
         
         // title
-        renderText(renderer, font, "Tank Trouble", {255, 255, 255, 255}, SCREEN_WIDTH / 2, SCREEN_HEIGHT / 4);
+        renderText(renderer, font, "Az Tank Trouble", {255, 255, 255, 255}, SCREEN_WIDTH / 2, 80);
         
         // box menu and hover
         for (const auto &box : boxes) {

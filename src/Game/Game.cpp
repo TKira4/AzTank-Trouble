@@ -56,16 +56,10 @@ void Game::resetGame() {
     
     if (mode == 1) {
         //Spawn in availble position
-        int aiSpawnX, aiSpawnY;
-        do {
-            aiSpawnX = (rand() % (MAZE_COLS - 2) + 1) * CELL_SIZE + CELL_SIZE / 2;
-            aiSpawnY = (rand() % (MAZE_ROWS - 2) + 1) * CELL_SIZE + CELL_SIZE / 2;
-        } while (isPointInWall(maze, aiSpawnX, aiSpawnY));
-        
-        ai = new AITank(aiSpawnX, aiSpawnY, {255, 0, 0, 255}, 2);
-        ai->score = 0;
+        ai = new AITank((MAZE_COLS - 2) * CELL_SIZE + 5,
+                        (MAZE_ROWS - 2) * CELL_SIZE + 5,
+                        {255, 0, 0, 255}, 2);
         ai->initTexture(renderer);
-        std::cout << "[DEBUG] Mode 1: AI created at (" << aiSpawnX << ", " << aiSpawnY << ")" << std::endl;
     } else if (mode == 2) {
         int p2SpawnX, p2SpawnY;
         do {
@@ -144,6 +138,8 @@ bool Game::init(const char* title, int width, int height) {
 
     Mix_Volume(-1, MIX_MAX_VOLUME);
 
+    explosionSound = Mix_LoadWAV("assets/sounds/tank-explosion.mp3");
+
     gunshotSound = Mix_LoadWAV("assets/sounds/tank-shoot.wav");
     if (!gunshotSound) {
         std::cout << "Failed to load gunshot sound! Mix_Error: "
@@ -208,7 +204,7 @@ void Game::processEvents(float deltaTime) {
                 player1Ammo--;
                 Mix_PlayChannel(-1, gunshotSound, 0);
             }
-            //player 1 shoot by keyword "m"
+            //player 2 shoot by keyword "m"
             if (player2 && e.key.keysym.sym == SDLK_m && player2->alive && player2Ammo > 0) {
                 float bulletSpeed = 200.0f;
                 SDL_Point c = player2->getCenter();
@@ -235,6 +231,7 @@ void Game::update(float deltaTime) {
     if (player2 && player2->alive)
         targets.push_back(player2);
     
+    
     if (mode == 1 && ai && ai->alive) {
         ai->updateAI(targets, *maze, deltaTime, bullets);
     } else if (mode == 2) {
@@ -243,10 +240,23 @@ void Game::update(float deltaTime) {
     } else if (mode == 3) {
         if (player2 && player2->alive)
             player2->updatePlayer2(keyState, deltaTime, *maze);
-        if (bot1 && bot1->alive)
+        if (bot1 && bot1->alive){
             bot1->updateAI(targets, *maze, deltaTime, bullets);
-        if (bot2 && bot2->alive)
+            if(!player1.alive && !player2->alive) 
+            {
+                std::vector<Tank*> target;
+                if(bot2 && bot2->alive) target.push_back(bot2);
+                bot1->updateAI(target, *maze, deltaTime, bullets);
+            }
+        }
+        if (bot2 && bot2->alive){
             bot2->updateAI(targets, *maze, deltaTime, bullets);
+            if(!player1.alive && !player2->alive) 
+            {
+                if(bot1 && bot1->alive) targets.push_back(bot1);
+                bot2->updateAI(targets, *maze, deltaTime, bullets);
+            }
+        }
     }
     
     Uint32 currentTime = SDL_GetTicks();
@@ -301,6 +311,7 @@ void Game::update(float deltaTime) {
                     case 3: if (mode == 3 && bot2) { bot2->score++; } break;
                 }
                 target->alive = false;
+                Mix_PlayChannel(-1, explosionSound, 0);
                 it = bullets.erase(it);
                 bulletErased = true;
                 break;
@@ -337,7 +348,7 @@ void Game::update(float deltaTime) {
         if (bot2 && bot2->alive) aliveCount++;
     }
     
-    if (aliveCount <= 1) {
+    if (aliveCount <= 1 ) {
         int choice = showGameOverMenu(renderer, scores, mode); // 1: Restart, 2: Return to Menu
         if (choice == 1) {
             resetGame();
